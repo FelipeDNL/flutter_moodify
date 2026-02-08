@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_test/data/const/ui_constants.dart';
+import 'package:flutter_application_test/data/services/mood_music_service.dart';
 import 'package:flutter_application_test/ui/core/ui/theme/app_theme.dart';
 import 'package:flutter_application_test/ui/core/ui/widgets/custom_elevated_buttom.dart';
 import 'package:flutter_application_test/ui/widgets/custom_text_input.dart';
@@ -21,6 +22,7 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
   final ImagePicker _picker = ImagePicker();
   int? _selectedMood; // 0 a 9
 
+  final _moodMusicService = MoodMusicService();
   bool _isSubmitting = false;
 
   // Lista de emojis para representar os humores
@@ -82,22 +84,32 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
     setState(() => _isSubmitting = true);
 
     try {
-      // TODO: Implement save logic with mood value (_selectedMood)
-      // _selectedMood contém um valor de 0 a 9
-      
-      await Future.delayed(const Duration(seconds: 1)); // Simulação
+      // Salvar música com humor no Firebase
+      await _moodMusicService.saveMoodMusic(
+        band: band,
+        album: album,
+        musicName: musicName,
+        albumCover: _albumCover!,
+        mood: _selectedMood!,
+      );
 
       if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Música registrada com humor: ${_moodEmojis[_selectedMood!]}')),
+        SnackBar(
+          content: Text('Música "$musicName" registrada com humor: ${_moodEmojis[_selectedMood!]}'),
+          backgroundColor: Colors.green,
+        ),
       );
       
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: ${e.toString()}')),
+        SnackBar(
+          content: Text('Erro ao salvar: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -190,7 +202,7 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
                       const SizedBox(height: 8),
                       
                       GestureDetector(
-                        onTap: _pickImage,
+                        onTap: _isSubmitting ? null : _pickImage,
                         child: Container(
                           height: 200,
                           decoration: BoxDecoration(
@@ -284,7 +296,7 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
     final isSelected = _selectedMood == moodValue;
     
     return GestureDetector(
-      onTap: () {
+      onTap: _isSubmitting ? null : () {
         setState(() {
           _selectedMood = moodValue;
         });
