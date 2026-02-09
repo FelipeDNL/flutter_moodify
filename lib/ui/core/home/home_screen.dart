@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Páginas para cada item do bottom navigation
   final List<Widget> _pages = [
     const HomePage(),
-    const StatsPage(),
+    const MoodsPage(),
     const ProfilePage(),
   ];
 
@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_outlined),
             activeIcon: Icon(Icons.bar_chart),
-            label: 'Estatísticas',
+            label: 'Humor',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
@@ -188,7 +188,10 @@ class _HomePageState extends State<HomePage> {
                           child: ListView.builder(
                             itemCount: _musicList.length,
                             itemBuilder: (context, index) {
-                              return MusicCard(musicData: _musicList[index]);
+                              return MusicCard(
+                                musicData: _musicList[index],
+                                onDelete: _loadMusicList,
+                              );
                             },
                           ),
                         ),
@@ -201,14 +204,14 @@ class _HomePageState extends State<HomePage> {
 }
 
 // Página de Estatísticas - Agora é um botão que abre o drawer
-class StatsPage extends StatefulWidget {
-  const StatsPage({super.key});
+class MoodsPage extends StatefulWidget {
+  const MoodsPage({super.key});
 
   @override
-  State<StatsPage> createState() => _StatsPageState();
+  State<MoodsPage> createState() => _MoodsPageState();
 }
 
-class _StatsPageState extends State<StatsPage> {
+class _MoodsPageState extends State<MoodsPage> {
   final _moodMusicService = MoodMusicService();
   bool _hasMusicToday = false;
   bool _isLoading = true;

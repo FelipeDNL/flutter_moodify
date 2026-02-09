@@ -6,6 +6,7 @@ import 'package:flutter_application_test/ui/core/auth/auth_wrapper.dart';
 import 'package:flutter_application_test/ui/core/auth/login/login_screen.dart';
 import 'package:flutter_application_test/ui/core/home/home_screen.dart';
 import 'package:flutter_application_test/ui/core/ui/theme/app_theme.dart';
+import 'package:flutter_application_test/data/services/notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 
@@ -15,6 +16,11 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize and schedule notifications
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  await notificationService.scheduleDailyMoodReminder();
 
   runApp(const MyApp());
 }

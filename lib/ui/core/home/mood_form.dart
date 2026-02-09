@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_test/data/const/ui_constants.dart';
 import 'package:flutter_application_test/data/services/mood_music_service.dart';
+import 'package:flutter_application_test/data/services/notification_service.dart';
 import 'package:flutter_application_test/ui/core/ui/theme/app_theme.dart';
 import 'package:flutter_application_test/ui/core/ui/widgets/custom_elevated_buttom.dart';
 import 'package:flutter_application_test/ui/widgets/custom_text_input.dart';
@@ -95,6 +96,9 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
         albumCover: _albumCover!,
         mood: _selectedMood!,
       );
+
+      // Cancel today's notification since mood is now set
+      await NotificationService().cancelMoodNotification();
 
       if (!mounted) return;
 

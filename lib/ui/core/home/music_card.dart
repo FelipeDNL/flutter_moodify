@@ -6,9 +6,19 @@ import 'package:intl/intl.dart';
 
 class MusicCard extends StatelessWidget {
   final Map<String, dynamic> musicData;
+  final VoidCallback? onDelete;
   final MoodMusicService _moodMusicService = MoodMusicService();
 
-  MusicCard({super.key, required this.musicData});
+  MusicCard({super.key, required this.musicData, this.onDelete});
+
+  // Mapeamento de mood para emoji
+  static const Map<int, String> _moodEmojis = {
+    0: '😢', // Triste
+    1: '😐', // Neutro
+    2: '🙂', // Bem
+    3: '😊', // Feliz
+    4: '🤩', // Muito Feliz
+  };
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
@@ -36,6 +46,9 @@ class MusicCard extends StatelessWidget {
     final musicName = musicData['musicName'] as String? ?? '';
     final albumCoverBase64 = musicData['albumCoverBase64'] as String?;
     final createdAt = musicData['createdAt'] as DateTime?;
+    final mood = musicData['mood'] as int?;
+    final id = musicData['id'] as String?;
+    final moodEmoji = mood != null ? _moodEmojis[mood] ?? '' : '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -87,7 +100,7 @@ class MusicCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  musicName,
+                  '$moodEmoji $musicName',
                   style: TextStyle(
                     color: AppTheme.onSurface,
                     fontSize: 16,
@@ -116,6 +129,63 @@ class MusicCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+
+          // Delete Button
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: AppTheme.onSurface.withValues(alpha: 0.5),
+              size: 20,
+            ),
+            onPressed: () async {
+              if (id == null) return;
+
+              // Show confirmation dialog
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Excluir música'),
+                  content: const Text('Deseja realmente excluir esta música?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                try {
+                  await _moodMusicService.deleteMoodMusic(id);
+                  if (onDelete != null) {
+                    onDelete!();
+                  }
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Música excluída com sucesso'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Erro ao excluir: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
           ),
         ],
       ),
