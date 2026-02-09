@@ -20,23 +20,26 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
   final _musicNameController = TextEditingController();
   File? _albumCover;
   final ImagePicker _picker = ImagePicker();
-  int? _selectedMood; // 0 a 9
+  int? _selectedMood; // 0 a 4
 
   final _moodMusicService = MoodMusicService();
   bool _isSubmitting = false;
 
   // Lista de emojis para representar os humores
   final List<String> _moodEmojis = [
-    '😢', // 0 - Muito Triste
-    '😔', // 1 - Triste
-    '😐', // 2 - Neutro/Entediado
-    '🙂', // 3 - Calmo
-    '😊', // 4 - Satisfeito
-    '😃', // 5 - Feliz
-    '😄', // 6 - Muito Feliz
-    '🥰', // 7 - Apaixonado
-    '😎', // 8 - Confiante
-    '🤩', // 9 - Animado/Empolgado
+    '😢', // 0 - Triste
+    '😐', // 1 - Neutro
+    '🙂', // 2 - Bem
+    '😊', // 3 - Feliz
+    '🤩', // 4 - Muito Feliz
+  ];
+
+  final List<String> _moodLabels = [
+    'Triste',
+    'Neutro',
+    'Bem',
+    'Feliz',
+    'Muito Feliz',
   ];
 
   @override
@@ -94,14 +97,14 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
       );
 
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Música "$musicName" registrada com humor: ${_moodEmojis[_selectedMood!]}'),
           backgroundColor: Colors.green,
         ),
       );
-      
+
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
@@ -251,26 +254,13 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
-                      // Grade de Emojis (2 linhas x 5 colunas)
-                      Column(
-                        children: [
-                          // Primeira linha (0-4)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(5, (index) {
-                              return _buildMoodButton(index);
-                            }),
-                          ),
-                          const SizedBox(height: 12),
-                          // Segunda linha (5-9)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(5, (index) {
-                              return _buildMoodButton(index + 5);
-                            }),
-                          ),
-                        ],
+
+                      // Linha única de 5 emojis
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(5, (index) {
+                          return _buildMoodButton(index);
+                        }),
                       ),
                       
                       const SizedBox(height: 32),
@@ -294,34 +284,49 @@ class _MoodFormBottomSheetState extends State<MoodFormBottomSheet> {
 
   Widget _buildMoodButton(int moodValue) {
     final isSelected = _selectedMood == moodValue;
-    
+
     return GestureDetector(
       onTap: _isSubmitting ? null : () {
         setState(() {
           _selectedMood = moodValue;
         });
       },
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? AppTheme.primary.withValues(alpha: 0.3)
-              : AppTheme.onSurface.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected 
-                ? AppTheme.primary
-                : AppTheme.onSurface.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1,
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppTheme.primary.withValues(alpha: 0.3)
+                  : AppTheme.onSurface.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? AppTheme.primary
+                    : AppTheme.onSurface.withValues(alpha: 0.3),
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                _moodEmojis[moodValue],
+                style: const TextStyle(fontSize: 32),
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(
-            _moodEmojis[moodValue],
-            style: TextStyle(fontSize: 32),
+          const SizedBox(height: 4),
+          Text(
+            _moodLabels[moodValue],
+            style: TextStyle(
+              color: isSelected
+                  ? AppTheme.primary
+                  : AppTheme.onSurface.withValues(alpha: 0.7),
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
